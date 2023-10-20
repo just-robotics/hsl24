@@ -4,8 +4,8 @@
 
 KOB_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
-IMG_NAME="hsl_2022_kobuki_sol"
-BASE_IMG="nickodema/hsl_2022_kobuki"
+BASE_IMG="nickodema/hsl_kobuki:galactic-20.04-20102023"
+IMG_NAME="hsl_2023_kobuki_solution"
 
 
 ### DOCKER BUILD --------------------------------------------------------- #
