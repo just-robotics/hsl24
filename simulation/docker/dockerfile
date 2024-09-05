@@ -19,7 +19,8 @@ RUN apt install -y \
     ros-${ROS_DISTRO}-slam-toolbox \
     ros-${ROS_DISTRO}-navigation2  \
     ros-${ROS_DISTRO}-nav2-bringup \
-    ros-${ROS_DISTRO}-tf2-geometry-msgs
+    ros-${ROS_DISTRO}-tf2-geometry-msgs \
+    ros-${ROS_DISTRO}-zbar-ros
 
 RUN python3 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-RUN python3 -m pip install opencv-python qreader zbar
+RUN python3 -m pip install opencv-python qreader
