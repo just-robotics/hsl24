@@ -1,0 +1,63 @@
+<!--
+  This Behavior Tree replans the global path periodically at 1 Hz and it also has
+  recovery actions specific to planning / control as well as general system issues.
+  This will be continuous if a kinematically valid planner is selected.
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    
+    <!-- Поддерево навигации-->
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+
+      <PipelineSequence name="NavigateWithReplanning">
+        <!-- Поддерево планировщика -->
+        <RateController hz="0.1"> <!-- Установка частоты обновления поддерева -->
+          <RecoveryNode number_of_retries="3" name="ComputePathToPose">
+            <!-- Вычислить путь до целевой точки (глобальный планировщик) -->
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>    
+            
+            <!-- Если не получилось -->
+            <ReactiveFallback name="ComputePathToPoseRecoveryFallback">
+              <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+              <BackUp backup_dist="0.2" backup_speed="-0.5" />
+              <GoalUpdated />
+
+              <IsPathValid server_timeout="10" path="{path}" />
+            </ReactiveFallback>
+          </RecoveryNode>
+        </RateController>
+
+        <!-- Поддерево контроллера -->
+        <RateController hz="10.0"> 
+          <RecoveryNode number_of_retries="5" name="FollowPath">
+            <!-- Рассчёты действий контроллера (локальный планировщик) -->
+            <FollowPath path="{path}" controller_id="FollowPath"/>
+
+            <!-- Если не получилось -->
+            <ReactiveFallback name="FollowPathRecoveryFallback">
+              <ClearEntireCostmap name="ClearLocalCostmap-Context"
+                service_name="local_costmap/clear_entirely_local_costmap" />
+              <BackUp backup_dist="-0.4" backup_speed="-0.4" />
+              <Spin spin_dist="2.0" />
+            </ReactiveFallback>
+          </RecoveryNode>
+        </RateController>
+
+      </PipelineSequence>
+
+      <!-- Поддерево восстановления, выполняется при FAILURE от поддерева навигации -->
+      <ReactiveFallback name="RecoveryFallback">
+
+        <!-- Возможно цель всё-таки достигнута-->
+        <GoalUpdated/>
+
+        <RoundRobin name="RecoveryActions">
+          <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+          <Spin spin_dist="3.0"/>
+          <BackUp backup_dist="-0.3" backup_speed="-0.3"/>
+        </RoundRobin>
+      </ReactiveFallback>
+
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

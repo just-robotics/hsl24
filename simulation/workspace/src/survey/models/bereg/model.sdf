@@ -3,6 +3,8 @@
   <model name='bereg'>
     <pose>0 0 0 0 0 0</pose>
 
+    <link name='base_footprint'/>
+
     <link name='base_link'>
       <pose>0 0 0 0 0 0</pose>
       <inertial>
@@ -36,6 +38,12 @@
         </geometry>
       </collision>
     </link>
+
+    <joint name='base_link_joint' type='fixed'>
+      <parent>base_footprint</parent>
+      <child>base_link</child>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
 
     <link name='left_wheel'>
       <pose>0 0.55 0.1 -1.5707 0 0</pose>
@@ -235,11 +243,6 @@
 
     <plugin name='diff_drive' filename='libgazebo_ros_diff_drive.so'>
 
-      <!-- <ros>
-        <namespace>/demo</namespace>
-        <remapping>cmd_vel:=cmd_demo</remapping>
-        <remapping>odom:=odom_demo</remapping>
-      </ros> -->
 
       <!-- Number of wheel pairs -->
       <!-- <num_wheel_pairs>2</num_wheel_pairs> -->
@@ -265,7 +268,7 @@
       <publish_wheel_tf>true</publish_wheel_tf>
 
       <odometry_frame>odom</odometry_frame>
-      <robot_base_frame>base_link</robot_base_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
 
     </plugin>
 
@@ -299,7 +302,7 @@
            </scan>
            <range>
              <min>0.5</min>
-             <max>8.0</max>
+             <max>12.0</max>
            </range>
            <noise>
              <type>gaussian</type>
