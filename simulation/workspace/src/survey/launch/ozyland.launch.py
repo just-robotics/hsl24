@@ -4,8 +4,6 @@
 
 import os
 
-from ament_index_python.packages import get_package_share_directory
-
 from launch import LaunchDescription
 
 from launch.actions import ExecuteProcess
@@ -28,6 +26,11 @@ def generate_launch_description():
                                  "--verbose",
                                  "-s", "libgazebo_ros_init.so",
                                  world_path]),
+
+        Node(package    = "tf2_ros",
+             executable = "static_transform_publisher",
+             arguments  = ["0", "0", "0", "0", "0", "0", "base_footprint", "base_link"],
+             output     = "screen"),
 
         Node(package    = "tf2_ros",
              executable = "static_transform_publisher",
