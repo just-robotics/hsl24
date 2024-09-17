@@ -1,0 +1,19 @@
+data_synchronizer:
+    ros__parameters:
+        rgb_topic: /camera/image_raw                       # input topic with rgb image
+        depth_topic: /camera/depth/image_raw               # input topic with depth image
+        odom_topic: /master/odom                           # input topic with odom
+        output_topic: /yolo/input                          # output topic for communication with yolo node
+        rgb_vis_topic: /data_synchronizer/rgb              # topic with rgb from data_synchronizer
+
+yolo_dispatcher:
+    ros__parameters:
+        camera_info_input_topic: /camera/camera_info       # input topic with camera_info
+        camera_info_topic: /rtabmap/yolo/camera_info       # input topic with camera_info
+        yolo_topic: /yolo/output                           # input topic with prediction from yolo
+        rgb_topic: /rtabmap/yolo/rgb                       # output topic with rgb image
+        depth_topic: /rtabmap/yolo/depth                   # output topic with static_depth image
+        mask_topic: /rtabmap/yolo/mask                     # output topic with mask
+        odom_topic: /rtabmap/yolo/odom                     # output topic with odom
+        detector_topic: /dynamic_detector/input            # output topic with dynamic_depth, mask and bounding boxes
+        real_mask_topic: /rtabmap/yolo/real_mask              # output topic with mask of dynamic_obstacles shapes
