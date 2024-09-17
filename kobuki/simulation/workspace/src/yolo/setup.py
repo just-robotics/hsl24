@@ -28,7 +28,8 @@ setup(
         'console_scripts': [
             'motion_detector = yolo.motion_detector:main',
             'keypoints_visualizer = yolo.keypoints_visualizer:main',
-            'fake_fast_detector = yolo.fake_fast_detector:main'
+            'fake_fast_detector = yolo.fake_fast_detector:main',
+            'aruco_detector = yolo.aruco_detector:main'
         ],
     },
 )
