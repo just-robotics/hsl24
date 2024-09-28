@@ -24,7 +24,7 @@ lidar_node = Node(
     executable='rplidar_composition',
     name='rplidar_composition',
     parameters=[
-        {'serial_port': '/dev/ttyUSB0'},
+        {'serial_port': '/dev/ttyUSB1'},
         {'frame_id': 'lidar'},
         {'angle_compensate': True},
         {'scan_mode': 'Standard'},
