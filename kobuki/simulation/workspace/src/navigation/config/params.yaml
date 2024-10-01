@@ -1,0 +1,31 @@
+controller:
+    ros__parameters:
+        verbose: true                                              # printing info about controller states if true
+        goal_pose_pub_topic: /goal_pose                            # topic with goal_pose for nav2
+        goal_pose_sub_topic: /master/target
+        nav2_cmd_vel_topic: /master/warper_cmd_vel                 # output topic for drive_controller
+        cmd_vel_topic: /commands/velocity                             # output topic for drive_controller
+        use_emergency_stop: true                                   # robot stops near dynamic objects if true
+        backward_linear_vel: -0.20                                 # linear x velocity for moving backward in recovery
+        allow_driving_topic: /master/allow_driving
+        feedback_topic: /navigate_to_pose/_action/feedback
+        delta: 0.30
+
+dispatcher:
+    ros__parameters:
+        verbose: true                                              # printing info about controller states if true
+        goal_pose_topic: /master/target                            # topic with goal_pose for nav2
+        master_allow_driving_topic: /master/allow_driving
+        slave_allow_driving_topic: /slave/allow_driving
+
+
+# 0, 1
+# -1, 1
+# -3, 1
+# -3, 2
+# -1, 3
+# 2, 1
+# 2, 2
+# 0, 2
+# 0, 3
+# 0, 4
