@@ -54,6 +54,11 @@ class Yolo():
         max_id = np.max(aruco_ids)
 
     def find_rvecs_tvecs(corners, marker_sz, cap_mtx, cap_dist):
+        print('MTX', cap_mtx)
+
+        if len(cap_mtx) == 0:
+            return None, None
+                
         marker_points = np.array([[-marker_sz / 2, marker_sz / 2, 0],
                                 [marker_sz / 2, marker_sz / 2, 0],
                                 [marker_sz / 2, -marker_sz / 2, 0],
@@ -62,6 +67,19 @@ class Yolo():
         tvecs = []
         for _ in corners:
             _, R, t = cv.solvePnP(marker_points, corners[0], cap_mtx, cap_dist, False, cv.SOLVEPNP_IPPE_SQUARE)
-            rvecs.append(R)
-            tvecs.append(t)
+            t = np.vstack([t, [1]])
+
+            t_ = np.zeros((4, 1))
+            t_[0] = t[2]
+            t_[1] = t[0]
+            t_[2] = t[1]
+            t_[3] = 1
+
+            R_ = np.zeros((3, 1))
+            R_[0] = R[2]
+            R_[1] = R[0]
+            R_[2] = R[1]
+
+            rvecs.append(R_)
+            tvecs.append(t_)
         return rvecs, tvecs
