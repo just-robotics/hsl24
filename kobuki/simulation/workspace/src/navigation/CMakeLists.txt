@@ -12,15 +12,15 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 
-add_executable(controller
-    src/controller.cpp
+add_executable(master_controller
+    src/master_controller.cpp
 )
 
 add_executable(dispatcher
     src/dispatcher.cpp
 )
 
-ament_target_dependencies(controller
+ament_target_dependencies(master_controller
     geometry_msgs
     nav2_msgs
     rclcpp
@@ -40,7 +40,7 @@ install(DIRECTORY
 )
 
 install(TARGETS
-  controller
+  master_controller
   dispatcher
   DESTINATION lib/${PROJECT_NAME}
 )

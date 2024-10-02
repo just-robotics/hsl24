@@ -69,5 +69,5 @@ def generate_launch_description():
         gazebo,
         spawn_entity_master,
         spawn_entity_slave,
-        goal_pose_pub,
+        # goal_pose_pub,
     ])

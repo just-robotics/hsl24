@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -16,13 +17,19 @@ private:
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr master_allow_driving_pub_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr slave_allow_driving_pub_;
 
+    rclcpp::TimerBase::SharedPtr timer_;
+
     bool verbose_;
+    bool started_ = false;
+    size_t state_ = 0;
+
+    std::vector<geometry_msgs::msg::PoseStamped> graph_;
 
 public:
     Dispatcher();
 
 private:
-
+    void initCallback();
 };
 
 
@@ -47,6 +54,19 @@ Dispatcher::Dispatcher() : Node("dispatcher") {
     goal_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(goal_pose_topic, 10);
     master_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(master_allow_driving_topic, 10);
     slave_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(slave_allow_driving_topic, 10);
+
+    timer_ = this->create_wall_timer(100ms, std::bind(&Dispatcher::initCallback, this));
+}
+
+
+void Dispatcher::initCallback() {
+    if (!this->get_parameter("start").as_bool() || started_) {
+            return;
+    }
+
+    started_ = true;
+    auto msg = graph_[0];
+    goal_pose_pub_->publish(msg);
 }
 
 

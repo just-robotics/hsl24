@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /TF1/Frames1
         - /map1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 719
@@ -53,44 +52,436 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        aruco_0_cell_00:
+          Value: false
+        aruco_0_cell_01:
+          Value: false
+        aruco_0_cell_02:
+          Value: false
+        aruco_0_cell_03:
+          Value: false
+        aruco_0_cell_04:
+          Value: false
+        aruco_0_cell_05:
+          Value: false
+        aruco_0_cell_06:
+          Value: false
+        aruco_0_cell_10:
+          Value: false
+        aruco_0_cell_11:
+          Value: false
+        aruco_0_cell_12:
+          Value: false
+        aruco_0_cell_13:
+          Value: false
+        aruco_0_cell_14:
+          Value: false
+        aruco_0_cell_15:
+          Value: false
+        aruco_0_cell_16:
+          Value: false
+        aruco_0_cell_20:
+          Value: false
+        aruco_0_cell_21:
+          Value: false
+        aruco_0_cell_22:
+          Value: false
+        aruco_0_cell_23:
+          Value: false
+        aruco_0_cell_24:
+          Value: false
+        aruco_0_cell_25:
+          Value: false
+        aruco_0_cell_26:
+          Value: false
+        aruco_0_cell_30:
+          Value: false
+        aruco_0_cell_31:
+          Value: false
+        aruco_0_cell_32:
+          Value: false
+        aruco_0_cell_33:
+          Value: false
+        aruco_0_cell_34:
+          Value: false
+        aruco_0_cell_35:
+          Value: false
+        aruco_0_cell_36:
+          Value: false
+        aruco_0_cell_40:
+          Value: false
+        aruco_0_cell_41:
+          Value: false
+        aruco_0_cell_42:
+          Value: false
+        aruco_0_cell_43:
+          Value: false
+        aruco_0_cell_44:
+          Value: false
+        aruco_0_cell_45:
+          Value: false
+        aruco_0_cell_46:
+          Value: false
+        aruco_0_cell_50:
+          Value: false
+        aruco_0_cell_51:
+          Value: false
+        aruco_0_cell_52:
+          Value: false
+        aruco_0_cell_53:
+          Value: false
+        aruco_0_cell_54:
+          Value: false
+        aruco_0_cell_55:
+          Value: false
+        aruco_0_cell_56:
+          Value: false
+        aruco_0_cell_60:
+          Value: false
+        aruco_0_cell_61:
+          Value: false
+        aruco_0_cell_62:
+          Value: false
+        aruco_0_cell_63:
+          Value: false
+        aruco_0_cell_64:
+          Value: false
+        aruco_0_cell_65:
+          Value: false
+        aruco_0_cell_66:
+          Value: false
+        aruco_1_cell_00:
+          Value: false
+        aruco_1_cell_01:
+          Value: false
+        aruco_1_cell_02:
+          Value: false
+        aruco_1_cell_03:
+          Value: false
+        aruco_1_cell_04:
+          Value: false
+        aruco_1_cell_05:
+          Value: false
+        aruco_1_cell_06:
+          Value: false
+        aruco_1_cell_10:
+          Value: false
+        aruco_1_cell_11:
+          Value: false
+        aruco_1_cell_12:
+          Value: false
+        aruco_1_cell_13:
+          Value: false
+        aruco_1_cell_14:
+          Value: false
+        aruco_1_cell_15:
+          Value: false
+        aruco_1_cell_16:
+          Value: false
+        aruco_1_cell_20:
+          Value: false
+        aruco_1_cell_21:
+          Value: false
+        aruco_1_cell_22:
+          Value: false
+        aruco_1_cell_23:
+          Value: false
+        aruco_1_cell_24:
+          Value: false
+        aruco_1_cell_25:
+          Value: false
+        aruco_1_cell_26:
+          Value: false
+        aruco_1_cell_30:
+          Value: false
+        aruco_1_cell_31:
+          Value: false
+        aruco_1_cell_32:
+          Value: false
+        aruco_1_cell_33:
+          Value: false
+        aruco_1_cell_34:
+          Value: false
+        aruco_1_cell_35:
+          Value: false
+        aruco_1_cell_36:
+          Value: false
+        aruco_1_cell_40:
+          Value: false
+        aruco_1_cell_41:
+          Value: false
+        aruco_1_cell_42:
+          Value: false
+        aruco_1_cell_43:
+          Value: false
+        aruco_1_cell_44:
+          Value: false
+        aruco_1_cell_45:
+          Value: false
+        aruco_1_cell_46:
+          Value: false
+        aruco_1_cell_50:
+          Value: false
+        aruco_1_cell_51:
+          Value: false
+        aruco_1_cell_52:
+          Value: false
+        aruco_1_cell_53:
+          Value: false
+        aruco_1_cell_54:
+          Value: false
+        aruco_1_cell_55:
+          Value: false
+        aruco_1_cell_56:
+          Value: false
+        aruco_1_cell_60:
+          Value: false
+        aruco_1_cell_61:
+          Value: false
+        aruco_1_cell_62:
+          Value: false
+        aruco_1_cell_63:
+          Value: false
+        aruco_1_cell_64:
+          Value: false
+        aruco_1_cell_65:
+          Value: false
+        aruco_1_cell_66:
+          Value: false
+        aruco_2_cell_00:
+          Value: false
+        aruco_2_cell_01:
+          Value: false
+        aruco_2_cell_02:
+          Value: false
+        aruco_2_cell_03:
+          Value: false
+        aruco_2_cell_04:
+          Value: false
+        aruco_2_cell_05:
+          Value: false
+        aruco_2_cell_06:
+          Value: false
+        aruco_2_cell_10:
+          Value: false
+        aruco_2_cell_11:
+          Value: false
+        aruco_2_cell_12:
+          Value: false
+        aruco_2_cell_13:
+          Value: false
+        aruco_2_cell_14:
+          Value: false
+        aruco_2_cell_15:
+          Value: false
+        aruco_2_cell_16:
+          Value: false
+        aruco_2_cell_20:
+          Value: false
+        aruco_2_cell_21:
+          Value: false
+        aruco_2_cell_22:
+          Value: false
+        aruco_2_cell_23:
+          Value: false
+        aruco_2_cell_24:
+          Value: false
+        aruco_2_cell_25:
+          Value: false
+        aruco_2_cell_26:
+          Value: false
+        aruco_2_cell_30:
+          Value: false
+        aruco_2_cell_31:
+          Value: false
+        aruco_2_cell_32:
+          Value: false
+        aruco_2_cell_33:
+          Value: false
+        aruco_2_cell_34:
+          Value: false
+        aruco_2_cell_35:
+          Value: false
+        aruco_2_cell_36:
+          Value: false
+        aruco_2_cell_40:
+          Value: false
+        aruco_2_cell_41:
+          Value: false
+        aruco_2_cell_42:
+          Value: false
+        aruco_2_cell_43:
+          Value: false
+        aruco_2_cell_44:
+          Value: false
+        aruco_2_cell_45:
+          Value: false
+        aruco_2_cell_46:
+          Value: false
+        aruco_2_cell_50:
+          Value: false
+        aruco_2_cell_51:
+          Value: false
+        aruco_2_cell_52:
+          Value: false
+        aruco_2_cell_53:
+          Value: false
+        aruco_2_cell_54:
+          Value: false
+        aruco_2_cell_55:
+          Value: false
+        aruco_2_cell_56:
+          Value: false
+        aruco_2_cell_60:
+          Value: false
+        aruco_2_cell_61:
+          Value: false
+        aruco_2_cell_62:
+          Value: false
+        aruco_2_cell_63:
+          Value: false
+        aruco_2_cell_64:
+          Value: false
+        aruco_2_cell_65:
+          Value: false
+        aruco_2_cell_66:
+          Value: false
+        aruco_3_cell_00:
+          Value: false
+        aruco_3_cell_01:
+          Value: false
+        aruco_3_cell_02:
+          Value: false
+        aruco_3_cell_03:
+          Value: false
+        aruco_3_cell_04:
+          Value: false
+        aruco_3_cell_05:
+          Value: false
+        aruco_3_cell_06:
+          Value: false
+        aruco_3_cell_10:
+          Value: false
+        aruco_3_cell_11:
+          Value: false
+        aruco_3_cell_12:
+          Value: false
+        aruco_3_cell_13:
+          Value: false
+        aruco_3_cell_14:
+          Value: false
+        aruco_3_cell_15:
+          Value: false
+        aruco_3_cell_16:
+          Value: false
+        aruco_3_cell_20:
+          Value: false
+        aruco_3_cell_21:
+          Value: false
+        aruco_3_cell_22:
+          Value: false
+        aruco_3_cell_23:
+          Value: false
+        aruco_3_cell_24:
+          Value: false
+        aruco_3_cell_25:
+          Value: false
+        aruco_3_cell_26:
+          Value: false
+        aruco_3_cell_30:
+          Value: false
+        aruco_3_cell_31:
+          Value: false
+        aruco_3_cell_32:
+          Value: false
+        aruco_3_cell_33:
+          Value: false
+        aruco_3_cell_34:
+          Value: false
+        aruco_3_cell_35:
+          Value: false
+        aruco_3_cell_36:
+          Value: false
+        aruco_3_cell_40:
+          Value: false
+        aruco_3_cell_41:
+          Value: false
+        aruco_3_cell_42:
+          Value: false
+        aruco_3_cell_43:
+          Value: false
+        aruco_3_cell_44:
+          Value: false
+        aruco_3_cell_45:
+          Value: false
+        aruco_3_cell_46:
+          Value: false
+        aruco_3_cell_50:
+          Value: false
+        aruco_3_cell_51:
+          Value: false
+        aruco_3_cell_52:
+          Value: false
+        aruco_3_cell_53:
+          Value: false
+        aruco_3_cell_54:
+          Value: false
+        aruco_3_cell_55:
+          Value: false
+        aruco_3_cell_56:
+          Value: false
+        aruco_3_cell_60:
+          Value: false
+        aruco_3_cell_61:
+          Value: false
+        aruco_3_cell_62:
+          Value: false
+        aruco_3_cell_63:
+          Value: false
+        aruco_3_cell_64:
+          Value: false
+        aruco_3_cell_65:
+          Value: false
+        aruco_3_cell_66:
+          Value: false
         base_footprint:
           Value: true
         base_footprint_slave:
-          Value: true
+          Value: false
         base_link:
-          Value: true
+          Value: false
         base_link_slave:
-          Value: true
+          Value: false
         camera_link:
           Value: false
         camera_link_optical:
-          Value: true
+          Value: false
         caster_wheel_backward:
-          Value: true
+          Value: false
         caster_wheel_backward_slave:
-          Value: true
+          Value: false
         caster_wheel_forward:
-          Value: true
+          Value: false
         caster_wheel_forward_slave:
-          Value: true
+          Value: false
         chassis:
-          Value: true
+          Value: false
         chassis_slave:
-          Value: true
+          Value: false
         laser_frame:
-          Value: true
+          Value: false
         left_wheel:
-          Value: true
+          Value: false
         left_wheel_slave:
-          Value: true
+          Value: false
         map:
           Value: true
         odom:
-          Value: false
+          Value: true
         right_wheel:
-          Value: true
+          Value: false
         right_wheel_slave:
-          Value: true
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -197,7 +588,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /goal_pose
+        Value: /master/target
       Value: true
   Enabled: true
   Global Options:
@@ -245,7 +636,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 6.120527267456055
+      Distance: 6.614566326141357
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

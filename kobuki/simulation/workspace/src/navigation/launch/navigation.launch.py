@@ -155,7 +155,7 @@ def generate_launch_description():
                 respawn_delay=2.0,
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings + [('cmd_vel', '/master/warper_cmd_vel')],),
+                remappings=remappings + [('cmd_vel', '/master/warper_cmd_vel'), ('goal_pose', 'master/target')],),
             Node(
                 package='nav2_waypoint_follower',
                 executable='waypoint_follower',

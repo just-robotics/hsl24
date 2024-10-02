@@ -22,6 +22,7 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_sub_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_pub_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr result_pub_;
 
     rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr cancel_navigation_client_;
 
@@ -35,6 +36,8 @@ private:
     nav2_msgs::action::NavigateToPose_FeedbackMessage feedback_;
     bool processing_ = false;
     double delta_;
+    rclcpp::Time t_;
+
 
 public:
     Controller();
@@ -49,7 +52,7 @@ private:
 };
 
 
-Controller::Controller() : Node("controller") {
+Controller::Controller() : Node("master_controller") {
     using std::placeholders::_1;
 
     this->declare_parameter("verbose", true);
@@ -59,6 +62,7 @@ Controller::Controller() : Node("controller") {
     this->declare_parameter("cmd_vel_topic", "");
     this->declare_parameter("allow_driving_topic", "");
     this->declare_parameter("feedback_topic", "");
+    this->declare_parameter("result_topic", "");
     // this->declare_parameter("use_emergency_stop", false);
     // this->declare_parameter("backward_linear_vel", 0.0);
     this->declare_parameter("delta", 0.0);
@@ -70,6 +74,7 @@ Controller::Controller() : Node("controller") {
     std::string cmd_vel_topic = this->get_parameter("cmd_vel_topic").as_string();
     std::string allow_driving_topic = this->get_parameter("allow_driving_topic").as_string();
     std::string feedback_topic = this->get_parameter("feedback_topic").as_string();
+    std::string result_topic = this->get_parameter("result_topic").as_string();
     // use_emergency_stop_ = this->get_parameter("use_emergency_stop").as_bool();
     // backward_linear_vel_ = this->get_parameter("backward_linear_vel").as_double();
     delta_ = this->get_parameter("delta").as_double();
@@ -81,6 +86,7 @@ Controller::Controller() : Node("controller") {
     RCLCPP_INFO(this->get_logger(), "cmd_vel_topic: '%s'", cmd_vel_topic.c_str());
     RCLCPP_INFO(this->get_logger(), "allow_driving_topic: '%s'", allow_driving_topic.c_str());
     RCLCPP_INFO(this->get_logger(), "feedback_topic: '%s'", feedback_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "result_topic: '%s'", result_topic.c_str());
     // RCLCPP_INFO(this->get_logger(), "use_emergency_stop: '%s'", use_emergency_stop_ ? "true" : "false");
     // RCLCPP_INFO(this->get_logger(), "backward_linear_vel: '%f'", backward_linear_vel_);
     RCLCPP_INFO(this->get_logger(), "delta: '%f'", delta_);
@@ -91,6 +97,7 @@ Controller::Controller() : Node("controller") {
     feedback_sub_ = this->create_subscription<nav2_msgs::action::NavigateToPose_FeedbackMessage>(feedback_topic, 10, std::bind(&Controller::feedbackCallback, this, _1));
     goal_pose_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(goal_pose_sub_topic, 10, std::bind(&Controller::goalPoseCallback, this, _1));
     cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(cmd_vel_topic, 10);
+    result_pub_ = this->create_publisher<std_msgs::msg::Bool>(result_topic, 10);
 
     cancel_navigation_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(this,"/navigate_to_pose");
 
@@ -116,6 +123,7 @@ void Controller::cmdVelCallback(geometry_msgs::msg::Twist msg) {
 void Controller::goalPoseCallback(geometry_msgs::msg::PoseStamped msg) {
     goal_pose_ = msg;
     processing_ = true;
+    t_ = this->get_clock()->now();
     goal_pose_pub_->publish(msg);
 }
 
@@ -127,11 +135,12 @@ void Controller::allowDrivingCallback(std_msgs::msg::Bool msg) {
 
 
 void Controller::feedbackCallback(nav2_msgs::action::NavigateToPose_FeedbackMessage msg) {
-    //feedback_ = msg;
-    //if (feedback_.feedback.distance_remaining < delta_) {
+    feedback_ = msg;
+    RCLCPP_INFO(this->get_logger(), "DELTA, %lf, time = %lf", feedback_.feedback.distance_remaining, this->get_clock()->now().seconds() - t_.seconds());
+    if (feedback_.feedback.distance_remaining < delta_ && ((this->get_clock()->now().seconds() - t_.seconds()) > 1)) {
     //    cancelNavigation(true);
-    //    processing_ = false;
-    //}
+       processing_ = false;
+    }
 }
 
 
@@ -144,7 +153,6 @@ void Controller::cancelNavigation(bool status) {
         else {
             RCLCPP_INFO(this->get_logger(), "goal_pose canceled");
         }
-        
     }
 }
 
