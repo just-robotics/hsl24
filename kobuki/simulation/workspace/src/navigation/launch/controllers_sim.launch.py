@@ -11,7 +11,7 @@ def generate_launch_description():
 
     package_name = 'navigation'
 
-    parameters = [os.path.join(get_package_share_directory(package_name), 'config', 'master_params_sim.yaml')]
+    parameters = [os.path.join(get_package_share_directory(package_name), 'config', 'controllers_params_sim.yaml')]
 
     dispatcher = Node(
         package=package_name,

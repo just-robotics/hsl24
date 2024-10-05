@@ -11,6 +11,7 @@ find_package(nav2_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(tf2 REQUIRED)
 
 add_executable(master_controller
     src/master_controller.cpp
@@ -32,6 +33,7 @@ ament_target_dependencies(dispatcher
     geometry_msgs
     rclcpp
     std_msgs
+    tf2
 )
 
 install(DIRECTORY

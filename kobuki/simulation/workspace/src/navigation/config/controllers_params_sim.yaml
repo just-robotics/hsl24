@@ -18,3 +18,7 @@ dispatcher:
         goal_pose_topic: /goal_pose                                # topic with goal_pose for controller
         master_allow_driving_topic: /master/allow_driving
         slave_allow_driving_topic: /slave/allow_driving
+        result_topic: /master_controller/result
+        points: [-2.5, +0.5, 1.57,
+                 -2.5, +1.5, 1.57,
+                 -1.5, +1.5, 0.00,]

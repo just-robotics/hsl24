@@ -34,7 +34,6 @@ private:
     geometry_msgs::msg::PoseStamped goal_pose_;
     // float backward_linear_vel_;
     nav2_msgs::action::NavigateToPose_FeedbackMessage feedback_;
-    bool processing_ = false;
     double delta_;
     rclcpp::Time t_;
 
@@ -122,7 +121,6 @@ void Controller::cmdVelCallback(geometry_msgs::msg::Twist msg) {
 
 void Controller::goalPoseCallback(geometry_msgs::msg::PoseStamped msg) {
     goal_pose_ = msg;
-    processing_ = true;
     t_ = this->get_clock()->now();
     goal_pose_pub_->publish(msg);
 }
@@ -135,11 +133,13 @@ void Controller::allowDrivingCallback(std_msgs::msg::Bool msg) {
 
 
 void Controller::feedbackCallback(nav2_msgs::action::NavigateToPose_FeedbackMessage msg) {
+    static auto res = std_msgs::msg::Bool();
+    res.data = true;
     feedback_ = msg;
     RCLCPP_INFO(this->get_logger(), "DELTA, %lf, time = %lf", feedback_.feedback.distance_remaining, this->get_clock()->now().seconds() - t_.seconds());
     if (feedback_.feedback.distance_remaining < delta_ && ((this->get_clock()->now().seconds() - t_.seconds()) > 1)) {
-    //    cancelNavigation(true);
-       processing_ = false;
+       cancelNavigation(true);
+       result_pub_->publish(res);
     }
 }
 
