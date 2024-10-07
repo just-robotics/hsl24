@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /map1/Topic1
+        - /Pose1
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz_common/Selection
@@ -472,15 +473,11 @@ Visualization Manager:
           Value: false
         left_wheel:
           Value: false
-        left_wheel_slave:
-          Value: false
         map:
           Value: true
         odom:
           Value: true
         right_wheel:
-          Value: false
-        right_wheel_slave:
           Value: false
       Marker Scale: 1
       Name: TF
@@ -588,7 +585,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /master/target
+        Value: /goal_pose
       Value: true
   Enabled: true
   Global Options:
