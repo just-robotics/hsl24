@@ -97,6 +97,7 @@ void Dispatcher::parsePoints(std::vector<double> points) {
         pt.pose.orientation.y = q.getY();
         pt.pose.orientation.z = q.getZ();
         pt.pose.orientation.w = q.getW();
+        pt.header.frame_id = "map";
         graph_.push_back(pt);
     }
 }
@@ -106,7 +107,6 @@ geometry_msgs::msg::PoseStamped Dispatcher::dropPoint() {
     state_ = state_ == graph_.size() - 1 ? 0 : state_ + 1;
     auto pt = graph_[state_];
     pt.header.stamp = this->get_clock()->now();
-    pt.header.frame_id = "map";
     return pt;
 }
 

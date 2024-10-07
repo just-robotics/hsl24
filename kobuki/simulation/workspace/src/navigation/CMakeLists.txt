@@ -12,6 +12,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 add_executable(master_controller
     src/master_controller.cpp
@@ -27,6 +28,8 @@ ament_target_dependencies(master_controller
     rclcpp
     rclcpp_action
     std_msgs
+    nav_msgs
+    tf2
 )
 
 ament_target_dependencies(dispatcher

@@ -38,9 +38,10 @@ def generate_launch_description():
     spawn_entity_master = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-topic', 'robot_description',
                                    '-entity', 'tb2_master',
-                                   '-x', '-0.34',
-                                   '-y', '-0.18',
-                                   '-z', '0.23'],
+                                   '-x', '0.50',
+                                   '-y', '0.50',
+                                   '-z', '0.23',
+                                   '-Y', '1.57'],
                         output='screen',
                         namespace='master',
                         )
