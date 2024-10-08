@@ -148,13 +148,13 @@ void Controller::rotateCallback() {
         start_angle_ = euler_from_quaternion(q);
         RCLCPP_INFO(this->get_logger(), "start_angle: %lf", start_angle_);
         auto msg = geometry_msgs::msg::Twist();
-        msg.angular.z = 1.0;
+        msg.angular.z = 0.8;
         cmd_vel_pub_->publish(msg);
         rotate_t_ = this->get_clock()->now();
         return;
     }
 
-    if (this->get_clock()->now().seconds() - rotate_t_.seconds() < 1.0) {
+    if (this->get_clock()->now().seconds() - rotate_t_.seconds() < 0.2) {
         return;
     }
 
@@ -170,6 +170,7 @@ void Controller::rotateCallback() {
             auto res = std_msgs::msg::Bool();
             res.data = true;
             result_pub_->publish(res);
+            RCLCPP_INFO(this->get_logger(), "STOP");
         }
     }
 }
