@@ -106,31 +106,13 @@ class ArucoDetector(Node):
         aruco2clo.transform.translation.x = +T[2][0]
         aruco2clo.transform.translation.y = -T[0][0]
         aruco2clo.transform.translation.z = -T[1][0]
-        
-        def quaternion_from_euler(roll, pitch, yaw):
-            cy = np.cos(yaw * 0.5)
-            sy = np.sin(yaw * 0.5)
-            cp = np.cos(pitch * 0.5)
-            sp = np.sin(pitch * 0.5)
-            cr = np.cos(roll * 0.5)
-            sr = np.sin(roll * 0.5)
 
-            q = Quaternion()
-            q.x = cy * cp * sr - sy * sp * cr
-            q.y = sy * cp * sr + cy * sp * cr
-            q.z = sy * cp * cr - cy * sp * sr
-            q.w = cy * cp * cr + sy * sp * sr
+        rot_x = 0.0
+        rot_y = 0.0
+        rot_z = -R[0][1][0]
 
-            return q
-        
-        print('R', R)
-        # q = quaternion_from_euler(R[2][0], -R[0][0], -R[1][0])
-        q = quaternion_from_euler(-R[0][0], R[1][0], -R[2][0])
-        
-        aruco2clo.transform.rotation.x = q.x
-        aruco2clo.transform.rotation.y = q.y
-        aruco2clo.transform.rotation.z = q.z
-        aruco2clo.transform.rotation.w = q.w
+        q = quaternion_from_euler(rot_x, rot_y, rot_z)
+        aruco2clo.transform.rotation = q
         
         if self.cl2bl_tf != None:
             self.tf = multiply_transforms(self.cl2bl_tf, multiply_transforms(aruco2clo, multiply_transforms(self.aruco_r[marker_id], self.aruco_tf_list[marker_id])))
@@ -292,6 +274,29 @@ def multiply_transforms(transform1, transform2):
     result_matrix = tf_transformations.concatenate_matrices(matrix1, matrix2)
     result_transform = matrix_to_transform(result_matrix)
     return result_transform
+
+def quaternion_from_euler(ai, aj, ak):
+        ai /= 2.0
+        aj /= 2.0
+        ak /= 2.0
+        ci = math.cos(ai)
+        si = math.sin(ai)
+        cj = math.cos(aj)
+        sj = math.sin(aj)
+        ck = math.cos(ak)
+        sk = math.sin(ak)
+        cc = ci*ck
+        cs = ci*sk
+        sc = si*ck
+        ss = si*sk
+
+        q = Quaternion()
+        q.x = cj*sc - sj*cs
+        q.y = cj*ss + sj*cc
+        q.z = cj*cs - sj*sc
+        q.w = cj*cc + sj*ss
+
+        return q
 
 def main(args=None):
     rclpy.init(args=args)
