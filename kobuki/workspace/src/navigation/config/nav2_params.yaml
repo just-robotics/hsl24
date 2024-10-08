@@ -9,7 +9,7 @@ bt_navigator:
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
-    default_nav_to_pose_bt_xml: src/navigation/config/behavior_tree.xml
+    default_nav_to_pose_bt_xml: /workspace/src/navigation/config/behavior_tree.xml
   
     plugin_lib_names:
     - nav2_compute_path_to_pose_action_bt_node
