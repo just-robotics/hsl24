@@ -141,14 +141,15 @@ double euler_from_quaternion(geometry_msgs::msg::Quaternion quaternion) {
 }
 
 void Controller::rotateCallback() {
+    auto msg = geometry_msgs::msg::Twist();
+    msg.angular.z = 0.8;
+
     if (start_rotate_) {
         start_rotate_ = false;
         rotate_ = true;
         auto q = odom_.pose.pose.orientation;
         start_angle_ = euler_from_quaternion(q);
         RCLCPP_INFO(this->get_logger(), "start_angle: %lf", start_angle_);
-        auto msg = geometry_msgs::msg::Twist();
-        msg.angular.z = 0.8;
         cmd_vel_pub_->publish(msg);
         rotate_t_ = this->get_clock()->now();
         return;
@@ -164,13 +165,14 @@ void Controller::rotateCallback() {
         RCLCPP_INFO(this->get_logger(), "angle: %lf", yaw);
         if (std::abs(yaw - start_angle_) < 2) {
             rotate_ = false;
-            auto msg = geometry_msgs::msg::Twist();
             msg.angular.z = 0.0;
             cmd_vel_pub_->publish(msg);
             auto res = std_msgs::msg::Bool();
             res.data = true;
             result_pub_->publish(res);
-            RCLCPP_INFO(this->get_logger(), "STOP");
+        }
+        else {
+            cmd_vel_pub_->publish(msg);
         }
     }
 }
