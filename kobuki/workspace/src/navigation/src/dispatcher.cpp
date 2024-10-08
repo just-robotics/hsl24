@@ -87,7 +87,7 @@ void Dispatcher::initCallback() {
 
 void Dispatcher::parsePoints(std::vector<double> points) {
     for (size_t i = 0; i < points.size(); i += 3) {
-        RCLCPP_INFO(this->get_logger(), "point %ld: %lf %lf %lf", (i == 0 ? i : i - 1) / 2, points[i], points[i+1], points[i+2]);
+        RCLCPP_INFO(this->get_logger(), "point %ld: %lf %lf %lf", (i == 0 ? i : i - 1) / 3, points[i], points[i+1], points[i+2]);
         tf2::Quaternion q;
         q.setRPY(0, 0, points[i+2]);
         auto pt = geometry_msgs::msg::PoseStamped();
