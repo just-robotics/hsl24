@@ -154,7 +154,7 @@ void Controller::rotateCallback() {
         return;
     }
 
-    if (this->get_clock()->now().seconds() - rotate_t_.seconds() < 0.4) {
+    if (this->get_clock()->now().seconds() - rotate_t_.seconds() < 1.0) {
         return;
     }
 
