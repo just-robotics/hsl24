@@ -3,8 +3,10 @@ project(astra_camera)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -O3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -fPIC -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fPIC -g")
 set(CMAKE_BUILD_TYPE "Debug")
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -19,13 +21,12 @@ find_package(builtin_interfaces REQUIRED)
 find_package(camera_info_manager REQUIRED)
 find_package(class_loader REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(message_filters REQUIRED)
+find_package(camera_info_manager REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(glog REQUIRED)
 find_package(image_geometry REQUIRED)
 find_package(image_publisher REQUIRED)
 find_package(image_transport REQUIRED)
-find_package(libuvc REQUIRED)
-find_package(magic_enum REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
@@ -38,6 +39,18 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_search_module(LIBUVC REQUIRED libuvc)
+if (NOT LIBUVC_FOUND)
+  message(FATAL_ERROR "libuvc is not found")
+endif ()
+pkg_search_module(GLOG REQUIRED libglog)
+
+if (NOT GLOG_FOUND)
+  message(FATAL_ERROR "glog is not found")
+endif ()
+
 
 execute_process(COMMAND uname -m OUTPUT_VARIABLE MACHINES)
 execute_process(COMMAND getconf LONG_BIT OUTPUT_VARIABLE MACHINES_BIT)
@@ -78,15 +91,16 @@ set(dependencies
   tf2_msgs
   tf2_ros
   tf2_sensor_msgs
+  message_filters
+  camera_info_manager
   )
 
 add_library(${PROJECT_NAME} SHARED
   src/point_cloud_proc/point_cloud_xyz.cpp
   src/point_cloud_proc/point_cloud_xyzrgb.cpp
-  src/device_listener.cpp
+  src/ob_context.cpp
   src/dynamic_params.cpp
   src/ob_camera_info.cpp
-  src/ob_frame_listener.cpp
   src/ob_timer_filter.cpp
   src/ob_camera_node_factory.cpp
   src/ob_camera_node.cpp
@@ -101,19 +115,50 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   ${OpenCV_INCLUDED_DIRS}
+  ${LIBUVC_INCLUDE_DIRS}
+  ${LIBUVC_INCLUDE_DIRS}
+  ${GLOG__INCLUDE_DIRS}
   )
 
 ament_target_dependencies(${PROJECT_NAME}
   ${dependencies}
   )
+
 target_link_libraries(${PROJECT_NAME}
   ${OpenCV_LIBS}
   Eigen3::Eigen
-  glog::glog
-  magic_enum::magic_enum
-  LibUVC::UVCShared
+  ${GLOG_LIBRARIES}
+  ${LIBUVC_LIBRARIES}
   -lOpenNI2
   -L${ORBBEC_OPENNI2_REDIST}
+  )
+
+add_executable(${PROJECT_NAME}_node
+  src/main.cpp
+  )
+
+target_include_directories(${PROJECT_NAME}_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${OpenCV_INCLUDED_DIRS}
+  ${LIBUVC_INCLUDE_DIRS}
+  ${LIBUVC_INCLUDE_DIRS}
+  ${GLOG__INCLUDE_DIRS}
+  )
+
+ament_target_dependencies(${PROJECT_NAME}_node
+  ${dependencies}
+  )
+
+target_link_libraries(${PROJECT_NAME}_node
+  ${OpenCV_LIBS}
+  Eigen3::Eigen
+  ${GLOG_LIBRARIES}
+  ${LIBUVC_LIBRARIES}
+  -lOpenNI2
+  -L${ORBBEC_OPENNI2_REDIST}
+  ${PROJECT_NAME}
   )
 
 add_executable(list_devices_node
@@ -124,6 +169,8 @@ target_include_directories(list_devices_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   ${OpenCV_INCLUDED_DIRS}
+  ${LIBUVC_INCLUDE_DIRS}
+  ${GLOG__INCLUDE_DIRS}
   )
 
 ament_target_dependencies(list_devices_node
@@ -132,26 +179,46 @@ ament_target_dependencies(list_devices_node
 target_link_libraries(list_devices_node
   ${OpenCV_LIBS}
   Eigen3::Eigen
-  glog::glog
-  magic_enum::magic_enum
-  LibUVC::UVCShared
+  ${GLOG_LIBRARIES}
+  ${LIBUVC_LIBRARIES}
   -lOpenNI2
   -L${ORBBEC_OPENNI2_REDIST}
   ${PROJECT_NAME}
   )
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE "COMPOSITION_BUILDING_DLL")
+add_executable(clean_shm_node
+  src/clean_up_shm_node.cpp
+  )
 
-rclcpp_components_register_nodes(${PROJECT_NAME}
-  "${PROJECT_NAME}::PointCloudXyzrgbNode"
-  "${PROJECT_NAME}::PointCloudXyzNode"
-  "${PROJECT_NAME}::OBCameraNodeFactory")
+target_include_directories(clean_shm_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${OpenCV_INCLUDED_DIRS}
+  ${LIBUVC_INCLUDE_DIRS}
+  ${GLOG__INCLUDE_DIRS}
+  )
+
+ament_target_dependencies(clean_shm_node
+  ${dependencies}
+  )
+
+target_link_libraries(clean_shm_node
+  ${OpenCV_LIBS}
+  Eigen3::Eigen
+  ${GLOG_LIBRARIES}
+  ${LIBUVC_LIBRARIES}
+  -lOpenNI2
+  -L${ORBBEC_OPENNI2_REDIST}
+  ${PROJECT_NAME}
+  )
 
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
   )
+
 
 install(FILES openni2_redist/${HOST_PLATFORM}/libOpenNI2.so
   DESTINATION lib/
@@ -162,6 +229,8 @@ install(DIRECTORY openni2_redist/${HOST_PLATFORM}/OpenNI2
   )
 
 install(TARGETS list_devices_node
+  clean_shm_node
+  ${PROJECT_NAME}_node
   DESTINATION lib/${PROJECT_NAME}/
   )
 
@@ -175,22 +244,6 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/
   )
 
-install(DIRECTORY
-  config
-  DESTINATION share/${PROJECT_NAME}/
-  )
-
-
-install(DIRECTORY
-  params
-  DESTINATION share/${PROJECT_NAME}/
-  )
-
-
-install(DIRECTORY
-  rviz
-  DESTINATION share/${PROJECT_NAME}/
-  )
 
 if (BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -202,8 +255,8 @@ if (BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif ()
-
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(${dependencies})
+
 ament_package()
