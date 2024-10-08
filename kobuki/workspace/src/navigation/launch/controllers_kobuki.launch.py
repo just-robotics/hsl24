@@ -12,6 +12,13 @@ def generate_launch_description():
     package_name = 'navigation'
 
     parameters = [os.path.join(get_package_share_directory(package_name), 'config', 'controllers_params_kobuki.yaml')]
+    
+    dispatcher = Node(
+        package=package_name,
+        executable='dispatcher',
+        parameters=parameters,
+        output='screen',
+    )
 
     controller = Node(
         package=package_name,
@@ -22,4 +29,5 @@ def generate_launch_description():
 
     return LaunchDescription([
         controller,
+        dispatcher,
     ])
