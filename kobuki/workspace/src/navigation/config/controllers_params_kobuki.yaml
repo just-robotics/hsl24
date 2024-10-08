@@ -10,6 +10,7 @@ master_controller:
         allow_driving_topic: /master/allow_driving
         feedback_topic: /navigate_to_pose/_action/feedback
         result_topic: /master_controller/result
+        odom_topic: /master/odom
         delta: 0.30
 
 dispatcher:
