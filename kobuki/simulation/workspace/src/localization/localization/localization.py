@@ -103,11 +103,13 @@ class ArucoDetector(Node):
         aruco2clo.transform.translation.x = +T[2][0]
         aruco2clo.transform.translation.y = -T[0][0]
         aruco2clo.transform.translation.z = -T[1][0]
-        
-        aruco2clo.transform.rotation.x = 0.0
-        aruco2clo.transform.rotation.y = 0.0
-        aruco2clo.transform.rotation.z = 0.0
-        aruco2clo.transform.rotation.w = 1.0
+
+        rot_x = 0.0
+        rot_y = 0.0
+        rot_z = -R[0][1][0]
+
+        q = quaternion_from_euler(rot_x, rot_y, rot_z)
+        aruco2clo.transform.rotation = q
         
         if self.cl2bl_tf != None:
             self.tf = multiply_transforms(self.cl2bl_tf, multiply_transforms(aruco2clo, multiply_transforms(self.aruco_r[marker_id], self.aruco_tf_list[marker_id])))
@@ -265,6 +267,29 @@ def multiply_transforms(transform1, transform2):
     result_matrix = tf_transformations.concatenate_matrices(matrix1, matrix2)
     result_transform = matrix_to_transform(result_matrix)
     return result_transform
+
+def quaternion_from_euler(ai, aj, ak):
+        ai /= 2.0
+        aj /= 2.0
+        ak /= 2.0
+        ci = math.cos(ai)
+        si = math.sin(ai)
+        cj = math.cos(aj)
+        sj = math.sin(aj)
+        ck = math.cos(ak)
+        sk = math.sin(ak)
+        cc = ci*ck
+        cs = ci*sk
+        sc = si*ck
+        ss = si*sk
+
+        q = Quaternion()
+        q.x = cj*sc - sj*cs
+        q.y = cj*ss + sj*cc
+        q.z = cj*cs - sj*sc
+        q.w = cj*cc + sj*ss
+
+        return q
 
 def main(args=None):
     rclpy.init(args=args)
