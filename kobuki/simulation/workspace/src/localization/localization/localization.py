@@ -13,7 +13,7 @@ from cv_bridge import CvBridge
 from tf2_ros import Time
 from tf2_ros import TransformException, TransformBroadcaster
 from geometry_msgs.msg import Quaternion, PointStamped, Vector3, TransformStamped
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Bool
 
 
 class ArucoDetector(Node):
@@ -25,6 +25,7 @@ class ArucoDetector(Node):
         self.create_subscription(CameraInfo, '/camera/camera_info', self.camera_info_callback, 10)
         
         self.point_publisher = self.create_publisher(PointStamped, '/slave_position', 10)
+        self.res_pub = self.create_publisher(Bool, '/aruco/found', 10)
         
         self.bridge = CvBridge()
         
@@ -37,6 +38,7 @@ class ArucoDetector(Node):
         self.camera_link = 'camera_link'
         self.base_footprint_slave = 'base_footprint_slave'
         self.base_link = 'base_link'
+        self.map = 'map'
         
         self.mtx = None
         self.dist = None
@@ -94,6 +96,7 @@ class ArucoDetector(Node):
             return
         
         T = T[0]
+        R = R[0]
         marker_id = markersID[0][0]
         
         print(marker_id)
@@ -104,10 +107,30 @@ class ArucoDetector(Node):
         aruco2clo.transform.translation.y = -T[0][0]
         aruco2clo.transform.translation.z = -T[1][0]
         
-        aruco2clo.transform.rotation.x = 0.0
-        aruco2clo.transform.rotation.y = 0.0
-        aruco2clo.transform.rotation.z = 0.0
-        aruco2clo.transform.rotation.w = 1.0
+        def quaternion_from_euler(roll, pitch, yaw):
+            cy = np.cos(yaw * 0.5)
+            sy = np.sin(yaw * 0.5)
+            cp = np.cos(pitch * 0.5)
+            sp = np.sin(pitch * 0.5)
+            cr = np.cos(roll * 0.5)
+            sr = np.sin(roll * 0.5)
+
+            q = Quaternion()
+            q.x = cy * cp * sr - sy * sp * cr
+            q.y = sy * cp * sr + cy * sp * cr
+            q.z = sy * cp * cr - cy * sp * sr
+            q.w = cy * cp * cr + sy * sp * sr
+
+            return q
+        
+        print('R', R)
+        # q = quaternion_from_euler(R[2][0], -R[0][0], -R[1][0])
+        q = quaternion_from_euler(-R[0][0], R[1][0], -R[2][0])
+        
+        aruco2clo.transform.rotation.x = q.x
+        aruco2clo.transform.rotation.y = q.y
+        aruco2clo.transform.rotation.z = q.z
+        aruco2clo.transform.rotation.w = q.w
         
         if self.cl2bl_tf != None:
             self.tf = multiply_transforms(self.cl2bl_tf, multiply_transforms(aruco2clo, multiply_transforms(self.aruco_r[marker_id], self.aruco_tf_list[marker_id])))
@@ -115,6 +138,10 @@ class ArucoDetector(Node):
             self.tf.header.stamp = self.get_clock().now().to_msg()
             self.tf.header.frame_id = self.base_link
             self.tf.child_frame_id = self.base_footprint_slave
+            
+        msg = Bool()
+        msg.data = True
+        self.res_pub.publish(msg)
         
     def transform_callback(self):
         # camera_link -> base_link
