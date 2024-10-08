@@ -69,7 +69,7 @@ def generate_launch_description():
                 '--z', '0.45',
                 '--roll', '0.0',
                 '--pitch', '0.0',
-                '--yaw', '0.0',
+                '--yaw', '3.14',
                 '--frame-id', 'base_footprint',
                 '--child-frame-id', 'lidar',
             ]
