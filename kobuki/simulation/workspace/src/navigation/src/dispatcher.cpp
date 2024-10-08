@@ -18,12 +18,14 @@ private:
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr master_allow_driving_pub_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr slave_allow_driving_pub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr result_sub_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr aruco_sub_;
 
     rclcpp::TimerBase::SharedPtr timer_;
 
     bool verbose_;
     bool started_ = false;
     size_t state_ = 0;
+    bool aruco_ = false;
 
     std::vector<geometry_msgs::msg::PoseStamped> graph_;
 
@@ -32,6 +34,7 @@ public:
 
 private:
     void initCallback();
+    void arucoCallback(std_msgs::msg::Bool msg);
 
     void parsePoints(std::vector<double> points);
     geometry_msgs::msg::PoseStamped dropPoint();
@@ -47,6 +50,7 @@ Dispatcher::Dispatcher() : Node("dispatcher") {
     this->declare_parameter("master_allow_driving_topic", rclcpp::PARAMETER_STRING);
     this->declare_parameter("slave_allow_driving_topic", rclcpp::PARAMETER_STRING);
     this->declare_parameter("result_topic", rclcpp::PARAMETER_STRING);
+    this->declare_parameter("aruco_topic", rclcpp::PARAMETER_STRING);
     this->declare_parameter("points", rclcpp::PARAMETER_DOUBLE_ARRAY);
 
     this->declare_parameter("start", false);
@@ -56,6 +60,7 @@ Dispatcher::Dispatcher() : Node("dispatcher") {
     std::string master_allow_driving_topic = this->get_parameter("master_allow_driving_topic").as_string();
     std::string slave_allow_driving_topic = this->get_parameter("slave_allow_driving_topic").as_string();
     std::string result_topic = this->get_parameter("result_topic").as_string();
+    std::string aruco_topic = this->get_parameter("aruco_topic").as_string();
     std::vector<double> points = this->get_parameter("points").as_double_array();
 
     RCLCPP_INFO(this->get_logger(), "verbose: '%s'", verbose_ ? "true" : "false");
@@ -63,12 +68,14 @@ Dispatcher::Dispatcher() : Node("dispatcher") {
     RCLCPP_INFO(this->get_logger(), "master_allow_driving_topic: '%s'", master_allow_driving_topic.c_str());
     RCLCPP_INFO(this->get_logger(), "slave_allow_driving_topic: '%s'", slave_allow_driving_topic.c_str());
     RCLCPP_INFO(this->get_logger(), "result_topic: '%s'", result_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "aruco_topic: '%s'", aruco_topic.c_str());
     parsePoints(points);
 
     goal_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(goal_pose_topic, 10);
     master_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(master_allow_driving_topic, 10);
     slave_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(slave_allow_driving_topic, 10);
     result_sub_ = this->create_subscription<std_msgs::msg::Bool>(result_topic, 10, std::bind(&Dispatcher::feedbackCallback, this, _1));
+    aruco_sub_ = this->create_subscription<std_msgs::msg::Bool>(aruco_topic, 10, std::bind(&Dispatcher::arucoCallback, this, _1));
 
     timer_ = this->create_wall_timer(100ms, std::bind(&Dispatcher::initCallback, this));
 }
@@ -114,6 +121,14 @@ geometry_msgs::msg::PoseStamped Dispatcher::dropPoint() {
 void Dispatcher::feedbackCallback(std_msgs::msg::Bool msg) {
     if (msg.data) {
         goal_pose_pub_->publish(dropPoint());
+    }
+}
+
+
+void Dispatcher::arucoCallback(std_msgs::msg::Bool msg) {
+    if (msg.data) {
+        msg.data = false;
+        master_allow_driving_pub_->publish(msg);
     }
 }
 
