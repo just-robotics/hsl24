@@ -22,7 +22,7 @@ import cv2 as cv
 import numpy as np
 import math
 
-DEBUG = False
+DEBUG = True
 
 
 class ImageSubscriber(Node):
@@ -89,7 +89,7 @@ class ImageSubscriber(Node):
 
         self.diff_angle_pub = self.create_publisher(Float64, '/delta_angle', 10)
     
-    def find_rvecs_tvecs(self, corners, marker_sz, cap_mtx, cap_dist) -> (list, list):
+    def find_rvecs_tvecs(self, corners, marker_sz, cap_mtx, cap_dist):
 
         marker_points = np.array([[marker_sz / 2, -marker_sz / 2, 0],
                                             [-marker_sz / 2, -marker_sz / 2, 0],
@@ -105,7 +105,7 @@ class ImageSubscriber(Node):
             trash.append(nada)
         return rvecs, tvecs
     
-    def find_center(self, marker) -> (int, int):  # for DEBUG
+    def find_center(self, marker):  # for DEBUG
         x = marker.sum(axis=0) / len(marker)
         return x.astype(int)
 
@@ -143,17 +143,6 @@ class ImageSubscriber(Node):
 
     
     def send_tf(self):
-        
-
-
-        def quaternion_multiply(quaternion0, quaternion1):
-            w0, x0, y0, z0 = quaternion0
-            w1, x1, y1, z1 = quaternion1.w, quaternion1.x, quaternion1.y, quaternion1.z
-            return np.array([-x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0,
-                            x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
-                            -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
-                            x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0], dtype=np.float64)
-        
 
         def rerange_aruco_3(angle):
             if angle < 0:
@@ -202,9 +191,7 @@ class ImageSubscriber(Node):
             else:
                 return angle
                 
-
-
-        # print('aruco_' + str(self.marker_frame[0][0]) + '_cell_33')
+                
         to_frame_rel = 'aruco_' + str(self.marker_frame[0][0]) + '_cell_33'
         from_frame_rel = 'base_link_slave'
 
@@ -252,21 +239,6 @@ class ImageSubscriber(Node):
         slave_rot_z = -aruco_angle
 
         q = self.quaternion_from_euler(slave_rot_x, slave_rot_y, slave_rot_z)
-
-
-        
-        # print(euler_from_quaternion(q[0], q[1], q[2], q[3])) # x y z w
-        # print(euler_from_quaternion(x_tmp, y_tmp, z_tmp, w_tmp))
-
-        # print("\n")
-        # print("\n")
-        # print("\n")
-        # # print(self.slave_pos)
-        # # print(t.transform.translation.x, t.transform.translation.y, t.transform.translation.z)
-        # print("\n")
-        # print("\n")
-        # print("\n")
-
 
         self.t.transform.rotation.x = q[0]
         self.t.transform.rotation.y = q[1]
@@ -365,19 +337,10 @@ class ImageSubscriber(Node):
         frame = self.ros2cv.imgmsg_to_cv2(msg, "bgr8")
         markerCorners, self.markerIds, _ = self.aruco_detector.detectMarkers(frame)
         rvec, tvec = self.find_rvecs_tvecs(markerCorners[:1], self.marker_size, self.camera_matrix, self.dist_params)
-        # print("tvec:   " + str(rvec))
-        # print("rvec:   " + str(rvec))
 
         # slave found publisher
         msg = Bool()
-        msg.data = False #default not found
-
-        # print(self.camera_matrix)
-        # print(type(self.camera_matrix))
-        # print(self.camera_matrix.dtype)
-        # print(self.dist_params)
-        # print(type(self.dist_params))
-        # print(self.dist_params.dtype)
+        msg.data = False
         
         print(markerCorners)
         print(self.markerIds)
@@ -395,15 +358,11 @@ class ImageSubscriber(Node):
             msg.data = True
             self.get_slave_pos()
 
-            if True:
-                # print(self.marker_frame[0][0])
-                # print('COORDINATES:\n', self.slave_pos)
-                # print('ANGLES:\n', self.slave_angle)
-                # print(abs(self.slave_angle[0][0])-3.14)
+            if DEBUG:
                 print(self.markerIds[:1])
-                self.draw_marker_pose(frame, markerCorners[:1])
-                cv.aruco.drawDetectedMarkers(frame, markerCorners[:1], self.markerIds[:1])
-                cv.drawFrameAxes(frame, self.camera_matrix, self.dist_params, rvec[0], tvec[0], 0.1)
+                # self.draw_marker_pose(frame, markerCorners[:1])
+                # cv.aruco.drawDetectedMarkers(frame, markerCorners[:1], self.markerIds[:1])
+                # cv.drawFrameAxes(frame, self.camera_matrix, self.dist_params, rvec[0], tvec[0], 0.1)
 
         # publish is_slave_finded
         self.publisher_.publish(msg)
@@ -412,12 +371,10 @@ class ImageSubscriber(Node):
         self.slave_pos.pose.orientation.z *= -1.0
         self.slave_pos_publisher.publish(self.slave_pos)
     
-
-        if True:
+        if DEBUG:
             cv.circle(frame, self.cap_center, 4, (255, 0, 255), 2)
             cv.imshow('Camera view', frame)
             cv.waitKey(1)
-
 
 
 def main(args=None):

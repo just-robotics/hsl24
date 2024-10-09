@@ -50,7 +50,7 @@ def generate_launch_description():
         package='gazebo_ros', executable='spawn_entity.py',
         arguments=['-topic', 'robot_description',
                    '-entity', 'tb2_slave',
-                   '-x', '1.5',
+                   '-x', '2.5',
                    '-y', '2.5',
                    '-z', '0.23'],
         output='screen',

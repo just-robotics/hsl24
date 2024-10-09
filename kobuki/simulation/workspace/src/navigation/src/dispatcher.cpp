@@ -51,6 +51,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr slave_allow_driving_pub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr result_sub_;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr aruco_sub_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr result_loop_pub_;
 
     rclcpp::TimerBase::SharedPtr timer_;
 
@@ -108,6 +109,7 @@ Dispatcher::Dispatcher() : Node("dispatcher") {
     slave_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(slave_allow_driving_topic, 10);
     result_sub_ = this->create_subscription<std_msgs::msg::Bool>(result_topic, 10, std::bind(&Dispatcher::exploreFeedbackCallback, this, _1));
     aruco_sub_ = this->create_subscription<std_msgs::msg::Bool>(aruco_topic, 10, std::bind(&Dispatcher::arucoCallback, this, _1));
+    result_loop_pub_ = this->create_publisher<std_msgs::msg::Bool>(result_topic, 10);
 
     timer_ = this->create_wall_timer(100ms, std::bind(&Dispatcher::initCallback, this));
 }
@@ -142,16 +144,36 @@ geometry_msgs::msg::PoseStamped Dispatcher::dropPoint() {
 
 
 void Dispatcher::exploreFeedbackCallback(std_msgs::msg::Bool msg) {
-    if (msg.data) {
-        goal_pose_pub_->publish(dropPoint());
+    if (!aruco_) {
+        if (msg.data) {
+            goal_pose_pub_->publish(dropPoint());
+            auto pt = graph_[state_];
+            RCLCPP_INFO(this->get_logger(), "publishing point %ld: %lf %lf %lf %ld %ld", state_, pt.x(), pt.y(), pt.t(), pt.idx(), pt.parent_idx());
+        }
+        return;
+    }
+    
+    auto pt = graph_[state_];
+    size_t parent_idx = pt.parent_idx();
+    if (state_ != parent_idx) {
+        goal_pose_pub_->publish(graph_[parent_idx].pt());
     }
 }
 
 
 void Dispatcher::arucoCallback(std_msgs::msg::Bool msg) {
+    if (aruco_) {
+        return;
+    }
+    
     if (msg.data) {
         msg.data = false;
         master_allow_driving_pub_->publish(msg);
+        aruco_ = true;
+        msg.data = true;
+        master_allow_driving_pub_->publish(msg);
+        result_loop_pub_->publish(msg);
+        RCLCPP_INFO(this->get_logger(), "aruco found");
     }
 }
 

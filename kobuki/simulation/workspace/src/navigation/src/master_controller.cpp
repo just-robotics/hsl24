@@ -47,6 +47,8 @@ private:
     double start_angle_;
     bool rotate_ = false;
     bool start_rotate_ = false;
+    bool aruco_ = false;
+    bool use_rotation_ = true;
 
 public:
     Controller();
@@ -167,7 +169,7 @@ void Controller::rotateCallback() {
     if (rotate_) {
         auto q = odom_.pose.pose.orientation;
         double yaw = euler_from_quaternion(q);
-        RCLCPP_INFO(this->get_logger(), "angle: %lf", yaw);
+        // RCLCPP_INFO(this->get_logger(), "angle: %lf", yaw);
         if (std::abs(yaw - start_angle_) < 2) {
             rotate_ = false;
             auto msg = geometry_msgs::msg::Twist();
@@ -185,6 +187,8 @@ void Controller::arucoCallback(std_msgs::msg::Bool msg) {
     if (!msg.data) {
         return;
     }
+    aruco_ = true;
+    use_rotation_ = false;
     rotate_ = false;
     allow_driving_ = false;
     auto twist = geometry_msgs::msg::Twist();
@@ -196,7 +200,7 @@ void Controller::arucoCallback(std_msgs::msg::Bool msg) {
 void Controller::cmdVelCallback(geometry_msgs::msg::Twist msg) {
     if (!allow_driving_) {
         RCLCPP_WARN(this->get_logger(), "driving is forbidden");
-        cancelNavigation(true);
+        cancelNavigation(false);
         auto msg = geometry_msgs::msg::Twist();
         msg.angular.z = 0.0;
         cmd_vel_pub_->publish(msg);
@@ -226,15 +230,14 @@ void Controller::feedbackCallback(nav2_msgs::action::NavigateToPose_FeedbackMess
     if (rotate_) {
         return;
     }
-    static auto res = std_msgs::msg::Bool();
-    res.data = true;
+    
     feedback_ = msg;
     RCLCPP_INFO(this->get_logger(), "DELTA, %lf, time = %lf", feedback_.feedback.distance_remaining, this->get_clock()->now().seconds() - t_.seconds());
     if (feedback_.feedback.distance_remaining < delta_ && ((this->get_clock()->now().seconds() - t_.seconds()) > 1)) {
-       cancelNavigation(true);
-       start_rotate_ = true;
-       return;
-       result_pub_->publish(res);
+        cancelNavigation(true);
+        if (use_rotation_) {
+            start_rotate_ = true;
+        }
     }
 }
 
