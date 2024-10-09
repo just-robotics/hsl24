@@ -189,11 +189,8 @@ void Controller::arucoCallback(std_msgs::msg::Bool msg) {
     }
     aruco_ = true;
     use_rotation_ = false;
+    start_rotate_ = false;
     rotate_ = false;
-    allow_driving_ = false;
-    auto twist = geometry_msgs::msg::Twist();
-    twist.angular.z = 0.0;
-    cmd_vel_pub_->publish(twist);
 }
 
 
@@ -217,6 +214,7 @@ void Controller::cmdVelCallback(geometry_msgs::msg::Twist msg) {
 
 void Controller::goalPoseCallback(geometry_msgs::msg::PoseStamped msg [[maybe_unused]]) {
     t_ = this->get_clock()->now();
+    RCLCPP_INFO(this->get_logger(), "GET GOAL POSE");
 }
 
 
@@ -237,6 +235,11 @@ void Controller::feedbackCallback(nav2_msgs::action::NavigateToPose_FeedbackMess
         cancelNavigation(true);
         if (use_rotation_) {
             start_rotate_ = true;
+        }
+        else {
+            auto res = std_msgs::msg::Bool();
+            res.data = true;
+            result_pub_->publish(res);
         }
     }
 }

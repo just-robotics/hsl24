@@ -1,0 +1,4 @@
+detector:
+    ros__parameters:
+        camera_topic: /camera/image_raw
+        aruco_size: 0.07
