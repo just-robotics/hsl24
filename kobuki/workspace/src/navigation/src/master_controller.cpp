@@ -24,6 +24,7 @@ private:
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr allow_driving_sub_;
     rclcpp::Subscription<nav2_msgs::action::NavigateToPose_FeedbackMessage>::SharedPtr feedback_sub_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_sub_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr aruco_sub_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_; 
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr goal_pose_pub_;
@@ -46,6 +47,8 @@ private:
     double start_angle_;
     bool rotate_ = false;
     bool start_rotate_ = false;
+    bool aruco_ = false;
+    bool use_rotation_ = true;
 
 public:
     Controller();
@@ -58,6 +61,7 @@ private:
     void feedbackCallback(nav2_msgs::action::NavigateToPose_FeedbackMessage msg);
     void odomCallback(nav_msgs::msg::Odometry msg);
     void rotateCallback();
+    void arucoCallback(std_msgs::msg::Bool msg);
 
     void cancelNavigation(bool status);
 };
@@ -75,6 +79,7 @@ Controller::Controller() : Node("master_controller") {
     this->declare_parameter("allow_driving_topic", "");
     this->declare_parameter("feedback_topic", "");
     this->declare_parameter("result_topic", "");
+    this->declare_parameter("aruco_topic", "");
     // this->declare_parameter("use_emergency_stop", false);
     // this->declare_parameter("backward_linear_vel", 0.0);
     this->declare_parameter("delta", 0.0);
@@ -88,6 +93,7 @@ Controller::Controller() : Node("master_controller") {
     std::string allow_driving_topic = this->get_parameter("allow_driving_topic").as_string();
     std::string feedback_topic = this->get_parameter("feedback_topic").as_string();
     std::string result_topic = this->get_parameter("result_topic").as_string();
+    std::string aruco_topic = this->get_parameter("aruco_topic").as_string();
     // use_emergency_stop_ = this->get_parameter("use_emergency_stop").as_bool();
     // backward_linear_vel_ = this->get_parameter("backward_linear_vel").as_double();
     delta_ = this->get_parameter("delta").as_double();
@@ -100,6 +106,7 @@ Controller::Controller() : Node("master_controller") {
     RCLCPP_INFO(this->get_logger(), "allow_driving_topic: '%s'", allow_driving_topic.c_str());
     RCLCPP_INFO(this->get_logger(), "feedback_topic: '%s'", feedback_topic.c_str());
     RCLCPP_INFO(this->get_logger(), "result_topic: '%s'", result_topic.c_str());
+    RCLCPP_INFO(this->get_logger(), "aruco_topic: '%s'", aruco_topic.c_str());
     // RCLCPP_INFO(this->get_logger(), "use_emergency_stop: '%s'", use_emergency_stop_ ? "true" : "false");
     // RCLCPP_INFO(this->get_logger(), "backward_linear_vel: '%f'", backward_linear_vel_);
     RCLCPP_INFO(this->get_logger(), "delta: '%f'", delta_);
@@ -109,6 +116,7 @@ Controller::Controller() : Node("master_controller") {
     allow_driving_sub_ = this->create_subscription<std_msgs::msg::Bool>(allow_driving_topic, 10, std::bind(&Controller::allowDrivingCallback, this, _1));
     feedback_sub_ = this->create_subscription<nav2_msgs::action::NavigateToPose_FeedbackMessage>(feedback_topic, 10, std::bind(&Controller::feedbackCallback, this, _1));
     goal_pose_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(goal_pose_sub_topic, 10, std::bind(&Controller::goalPoseCallback, this, _1));
+    aruco_sub_ = this->create_subscription<std_msgs::msg::Bool>(aruco_topic, 10, std::bind(&Controller::arucoCallback, this, _1));
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(odom_topic, 10, std::bind(&Controller::odomCallback, this, _1));
     cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(cmd_vel_topic, 10);
     result_pub_ = this->create_publisher<std_msgs::msg::Bool>(result_topic, 10);
@@ -141,56 +149,72 @@ double euler_from_quaternion(geometry_msgs::msg::Quaternion quaternion) {
 }
 
 void Controller::rotateCallback() {
-    auto msg = geometry_msgs::msg::Twist();
-    msg.angular.z = 0.8;
-
     if (start_rotate_) {
         start_rotate_ = false;
         rotate_ = true;
         auto q = odom_.pose.pose.orientation;
         start_angle_ = euler_from_quaternion(q);
         RCLCPP_INFO(this->get_logger(), "start_angle: %lf", start_angle_);
+        auto msg = geometry_msgs::msg::Twist();
+        msg.angular.z = 1.0;
         cmd_vel_pub_->publish(msg);
         rotate_t_ = this->get_clock()->now();
         return;
     }
 
-    if (this->get_clock()->now().seconds() - rotate_t_.seconds() < 0.5) {
+    if (this->get_clock()->now().seconds() - rotate_t_.seconds() < 0.4) {
         return;
     }
 
     if (rotate_) {
         auto q = odom_.pose.pose.orientation;
         double yaw = euler_from_quaternion(q);
-        RCLCPP_INFO(this->get_logger(), "angle: %lf", yaw);
+        // RCLCPP_INFO(this->get_logger(), "angle: %lf", yaw);
         if (std::abs(yaw - start_angle_) < 2) {
             rotate_ = false;
+            auto msg = geometry_msgs::msg::Twist();
             msg.angular.z = 0.0;
             cmd_vel_pub_->publish(msg);
             auto res = std_msgs::msg::Bool();
             res.data = true;
             result_pub_->publish(res);
         }
-        else {
-            cmd_vel_pub_->publish(msg);
-        }
     }
+}
+
+
+void Controller::arucoCallback(std_msgs::msg::Bool msg) {
+    if (!msg.data || aruco_) {
+        return;
+    }
+    aruco_ = true;
+    use_rotation_ = false;
+    start_rotate_ = false;
+    rotate_ = false;
 }
 
 
 void Controller::cmdVelCallback(geometry_msgs::msg::Twist msg) {
-    if (!allow_driving_ || rotate_) {
+    if (!allow_driving_) {
         RCLCPP_WARN(this->get_logger(), "driving is forbidden");
+        cancelNavigation(false);
+        auto msg = geometry_msgs::msg::Twist();
+        msg.angular.z = 0.0;
+        cmd_vel_pub_->publish(msg);
         return;
     }
+
+    if (rotate_) {
+        return;
+    }
+
     cmd_vel_pub_->publish(msg);
 }
 
 
-void Controller::goalPoseCallback(geometry_msgs::msg::PoseStamped msg) {
-    // goal_pose_ = msg;
+void Controller::goalPoseCallback(geometry_msgs::msg::PoseStamped msg [[maybe_unused]]) {
     t_ = this->get_clock()->now();
-    // goal_pose_pub_->publish(msg);
+    RCLCPP_INFO(this->get_logger(), "GET GOAL POSE");
 }
 
 
@@ -204,15 +228,19 @@ void Controller::feedbackCallback(nav2_msgs::action::NavigateToPose_FeedbackMess
     if (rotate_) {
         return;
     }
-    static auto res = std_msgs::msg::Bool();
-    res.data = true;
+
     feedback_ = msg;
     RCLCPP_INFO(this->get_logger(), "DELTA, %lf, time = %lf", feedback_.feedback.distance_remaining, this->get_clock()->now().seconds() - t_.seconds());
     if (feedback_.feedback.distance_remaining < delta_ && ((this->get_clock()->now().seconds() - t_.seconds()) > 1)) {
-       cancelNavigation(true);
-       start_rotate_ = true;
-       return;
-       result_pub_->publish(res);
+        cancelNavigation(true);
+        if (use_rotation_) {
+            start_rotate_ = true;
+        }
+        else {
+            auto res = std_msgs::msg::Bool();
+            res.data = true;
+            result_pub_->publish(res);
+        }
     }
 }
 
