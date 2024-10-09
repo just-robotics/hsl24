@@ -7,9 +7,41 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 
 
 using namespace std::chrono_literals;
+
+
+class Point {
+private:
+    geometry_msgs::msg::PoseStamped pt_;
+    size_t idx_;
+    size_t parent_idx_;
+    tf2::Quaternion q_;
+
+public:
+    Point(float x, float y, float t, float idx, float parent_idx) {
+        pt_ = geometry_msgs::msg::PoseStamped();
+        q_.setRPY(0, 0, t);
+        pt_.pose.position.x = x;
+        pt_.pose.position.y = y;
+        pt_.pose.orientation.x = q_.getX();
+        pt_.pose.orientation.y = q_.getY();
+        pt_.pose.orientation.z = q_.getZ();
+        pt_.pose.orientation.w = q_.getW();
+        pt_.header.frame_id = "map";
+        idx_ = idx;
+        parent_idx_ = parent_idx;
+    }
+
+    float x() {return pt_.pose.position.x;}
+    float y() {return pt_.pose.position.y;}
+    float t() {tf2::Matrix3x3 m(q_); double roll, pitch, yaw; m.getRPY(roll, pitch, yaw); return yaw;}
+    size_t idx() {return idx_;}
+    size_t parent_idx() {return parent_idx_;}
+    geometry_msgs::msg::PoseStamped pt() {return pt_;}
+};
 
 
 class Dispatcher : public rclcpp::Node {
@@ -24,10 +56,10 @@ private:
 
     bool verbose_;
     bool started_ = false;
-    size_t state_ = 0;
+    size_t state_ = 1;
     bool aruco_ = false;
 
-    std::vector<geometry_msgs::msg::PoseStamped> graph_;
+    std::vector<Point> graph_;
 
 public:
     Dispatcher();
@@ -38,7 +70,7 @@ private:
 
     void parsePoints(std::vector<double> points);
     geometry_msgs::msg::PoseStamped dropPoint();
-    void feedbackCallback(std_msgs::msg::Bool msg);
+    void exploreFeedbackCallback(std_msgs::msg::Bool msg);
 };
 
 
@@ -74,7 +106,7 @@ Dispatcher::Dispatcher() : Node("dispatcher") {
     goal_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(goal_pose_topic, 10);
     master_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(master_allow_driving_topic, 10);
     slave_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(slave_allow_driving_topic, 10);
-    result_sub_ = this->create_subscription<std_msgs::msg::Bool>(result_topic, 10, std::bind(&Dispatcher::feedbackCallback, this, _1));
+    result_sub_ = this->create_subscription<std_msgs::msg::Bool>(result_topic, 10, std::bind(&Dispatcher::exploreFeedbackCallback, this, _1));
     aruco_sub_ = this->create_subscription<std_msgs::msg::Bool>(aruco_topic, 10, std::bind(&Dispatcher::arucoCallback, this, _1));
 
     timer_ = this->create_wall_timer(100ms, std::bind(&Dispatcher::initCallback, this));
@@ -87,38 +119,29 @@ void Dispatcher::initCallback() {
     }
 
     started_ = true;
-    auto msg = graph_[state_];
+    auto msg = graph_[state_].pt();
     goal_pose_pub_->publish(msg);
 }
 
 
 void Dispatcher::parsePoints(std::vector<double> points) {
-    for (size_t i = 0; i < points.size(); i += 3) {
-        RCLCPP_INFO(this->get_logger(), "point %ld: %lf %lf %lf", (i == 0 ? i : i - 1) / 2, points[i], points[i+1], points[i+2]);
-        tf2::Quaternion q;
-        q.setRPY(0, 0, points[i+2]);
-        auto pt = geometry_msgs::msg::PoseStamped();
-        pt.pose.position.x = points[i];
-        pt.pose.position.y = points[i+1];
-        pt.pose.orientation.x = q.getX();
-        pt.pose.orientation.y = q.getY();
-        pt.pose.orientation.z = q.getZ();
-        pt.pose.orientation.w = q.getW();
-        pt.header.frame_id = "map";
+    for (size_t i = 0; i < points.size(); i += 5) {
+        auto pt = Point(points[i], points[i+1], points[i+2], static_cast<size_t>(points[i+3]), static_cast<size_t>(points[i+4]));
         graph_.push_back(pt);
+        RCLCPP_INFO(this->get_logger(), "point %ld: %lf %lf %lf %ld %ld", i / 5, pt.x(), pt.y(), pt.t(), pt.idx(), pt.parent_idx());
     }
 }
 
 
 geometry_msgs::msg::PoseStamped Dispatcher::dropPoint() {
     state_ = state_ == graph_.size() - 1 ? 0 : state_ + 1;
-    auto pt = graph_[state_];
+    auto pt = graph_[state_].pt();
     pt.header.stamp = this->get_clock()->now();
     return pt;
 }
 
 
-void Dispatcher::feedbackCallback(std_msgs::msg::Bool msg) {
+void Dispatcher::exploreFeedbackCallback(std_msgs::msg::Bool msg) {
     if (msg.data) {
         goal_pose_pub_->publish(dropPoint());
     }
