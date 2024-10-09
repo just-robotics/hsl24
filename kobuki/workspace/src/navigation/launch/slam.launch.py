@@ -34,20 +34,52 @@ def generate_launch_description():
         output='screen')
     
     base_tf = Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='base_static_transform_publisher',
-            arguments=[
-                '--x', '0.000',
-                '--y', '0.000',
-                '--z', '0.0',
-                '--roll', '0.0',
-                '--pitch', '0.0',
-                '--yaw', '0.0',
-                '--frame-id', 'base_link',
-                '--child-frame-id', 'base_footprint',
-            ]
-        )
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_static_transform_publisher',
+        arguments=[
+            '--x', '0.000',
+            '--y', '0.000',
+            '--z', '0.0',
+            '--roll', '0.0',
+            '--pitch', '0.0',
+            '--yaw', '0.0',
+            '--frame-id', 'base_link',
+            '--child-frame-id', 'base_footprint',
+        ]
+    )
+    
+    camera_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='camera_static_transform_publisher',
+        arguments=[
+            '--x', '0.050',
+            '--y', '-0.120',
+            '--z', '0.300',
+            '--roll', '0.0',
+            '--pitch', '0.0',
+            '--yaw', '0.0',
+            '--frame-id', 'base_footprint',
+            '--child-frame-id', 'camera_link',
+        ]
+    )
+
+    lidar_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='lidar_static_transform_publisher',
+        arguments=[
+            '--x', '0.000',
+            '--y', '0.000',
+            '--z', '0.45',
+            '--roll', '0.0',
+            '--pitch', '0.0',
+            '--yaw', '3.14',
+            '--frame-id', 'base_footprint',
+            '--child-frame-id', 'lidar',
+        ]
+    )
     
     rviz = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -60,6 +92,8 @@ def generate_launch_description():
     ld.add_action(declare_slam_params_file_cmd)
     ld.add_action(start_async_slam_toolbox_node)
     ld.add_action(base_tf)
+    ld.add_action(camera_tf)
+    ld.add_action(lidar_tf)
     #ld.add_action(rviz)
 
     return ld

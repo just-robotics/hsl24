@@ -59,21 +59,7 @@ def generate_launch_description():
             default_value=scan_mode,
             description='Specifying scan mode of lidar'),
 
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='lidar_static_transform_publisher',
-            arguments=[
-                '--x', '0.000',
-                '--y', '0.000',
-                '--z', '0.45',
-                '--roll', '0.0',
-                '--pitch', '0.0',
-                '--yaw', '3.14',
-                '--frame-id', 'base_footprint',
-                '--child-frame-id', 'lidar',
-            ]
-        ),
+
 
 
         Node(
