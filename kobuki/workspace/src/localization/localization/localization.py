@@ -376,7 +376,11 @@ class ImageSubscriber(Node):
         self.publisher_.publish(msg)
         self.slave_pos.header.stamp = self.get_clock().now().to_msg()
         self.slave_pos.header.frame_id = 'map'
-        self.slave_pos.pose.orientation.z *= -1.0
+        #self.slave_pos.pose.orientation.z *= -1.0
+        
+        #self.slave_pos.pose.position.x *= -1
+        #self.slave_pos.pos.position.y *= -1
+        
         self.slave_pos_publisher.publish(self.slave_pos)
     
         if DEBUG:
