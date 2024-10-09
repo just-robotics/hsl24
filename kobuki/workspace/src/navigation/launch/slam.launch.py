@@ -54,8 +54,8 @@ def generate_launch_description():
         executable='static_transform_publisher',
         name='camera_static_transform_publisher',
         arguments=[
-            '--x', '0.050',
-            '--y', '-0.120',
+            '--x', '-0.120',
+            '--y', '0.050',
             '--z', '0.300',
             '--roll', '0.0',
             '--pitch', '0.0',
