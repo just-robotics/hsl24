@@ -21,6 +21,7 @@ docker run  -d -ti --rm \
             -v ${KOB_ROOT}/workspace:/workspace \
             -v /dev:/dev \
             -e "ROS_DOMAIN_ID=16" \
+            -e "ROBOT_NAME=slave" \
             --net=host \
             --privileged \
             --name ${CTR_NAME} ${IMG_NAME} \
