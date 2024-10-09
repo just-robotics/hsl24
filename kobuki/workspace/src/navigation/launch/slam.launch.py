@@ -33,6 +33,22 @@ def generate_launch_description():
         name='slam_toolbox',
         output='screen')
     
+    Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='base_static_transform_publisher',
+            arguments=[
+                '--x', '0.000',
+                '--y', '0.000',
+                '--z', '0.0',
+                '--roll', '0.0',
+                '--pitch', '0.0',
+                '--yaw', '0.0',
+                '--frame-id', 'base_link',
+                '--child-frame-id', 'base_footprint',
+            ]
+        ),
+    
     rviz = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [os.path.join(get_package_share_directory('navigation'), 'launch', 'rviz.launch.py')]),
