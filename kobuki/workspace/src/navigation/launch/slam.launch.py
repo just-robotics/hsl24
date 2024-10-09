@@ -33,7 +33,7 @@ def generate_launch_description():
         name='slam_toolbox',
         output='screen')
     
-    base_tf = Node(
+    base_tf_master = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_static_transform_publisher',
@@ -78,6 +78,22 @@ def generate_launch_description():
             '--yaw', '3.14',
             '--frame-id', 'base_footprint',
             '--child-frame-id', 'lidar',
+        ]
+    )
+
+    base_tf_slave = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_static_transform_publisher',
+        arguments=[
+            '--x', '0.000',
+            '--y', '0.000',
+            '--z', '0.0',
+            '--roll', '0.0',
+            '--pitch', '0.0',
+            '--yaw', '0.0',
+            '--frame-id', 'base_link_slave',
+            '--child-frame-id', 'base_footprint_slave',
         ]
     )
 
@@ -155,13 +171,14 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)
     ld.add_action(start_async_slam_toolbox_node)
-    ld.add_action(base_tf)
+    ld.add_action(base_tf_master)
     ld.add_action(camera_tf)
     ld.add_action(lidar_tf)
     ld.add_action(aruco_0_tf)
     ld.add_action(aruco_1_tf)
     ld.add_action(aruco_2_tf)
     ld.add_action(aruco_3_tf)
+    ld.add_action(base_tf_slave)
     #ld.add_action(rviz)
 
     return ld
