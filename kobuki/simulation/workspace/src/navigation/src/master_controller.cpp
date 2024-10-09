@@ -184,7 +184,7 @@ void Controller::rotateCallback() {
 
 
 void Controller::arucoCallback(std_msgs::msg::Bool msg) {
-    if (!msg.data) {
+    if (!msg.data || aruco_) {
         return;
     }
     aruco_ = true;
@@ -230,7 +230,7 @@ void Controller::feedbackCallback(nav2_msgs::action::NavigateToPose_FeedbackMess
     if (rotate_) {
         return;
     }
-    
+
     feedback_ = msg;
     RCLCPP_INFO(this->get_logger(), "DELTA, %lf, time = %lf", feedback_.feedback.distance_remaining, this->get_clock()->now().seconds() - t_.seconds());
     if (feedback_.feedback.distance_remaining < delta_ && ((this->get_clock()->now().seconds() - t_.seconds()) > 1)) {
