@@ -36,7 +36,7 @@ class ImageSubscriber(Node):
 
         self.subscription = self.create_subscription(  # Можно добавить QoS если будут потери изображений
             Image,
-            '/camera/image_raw',
+            '/camera/color/image_raw',
             self.img_callback,
             qos_profile=qos_policy)
         
@@ -69,7 +69,7 @@ class ImageSubscriber(Node):
 
         self.dist_params = np.array([ 0.07784166, -0.58879724, -0.00375178, -0.00643462,  1.07082767], dtype=np.float64)
 
-        self.marker_size = 0.07
+        self.marker_size = 0.15
         cap_width = 640
         cap_height = 480
         
