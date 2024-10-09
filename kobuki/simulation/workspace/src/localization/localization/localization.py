@@ -27,7 +27,16 @@ DEBUG = True
 
 class ImageSubscriber(Node):
     def __init__(self):
-        super().__init__('detector_sub')
+        super().__init__('detector')
+        
+        self.declare_parameters(namespace='', parameters=[('camera_topic', ''),
+                                                          ('aruco_size', 0.0),])
+        
+        camera_topic = self.get_parameter('camera_topic').value
+        self.marker_size = self.get_parameter('aruco_size').value
+        
+        self.get_logger().info(f'camera_topic: {camera_topic}')
+        self.get_logger().info(f'aruco_size: {self.marker_size}')
 
         qos_policy = rclpy.qos.QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
                                           history=rclpy.qos.HistoryPolicy.KEEP_LAST,
@@ -36,7 +45,7 @@ class ImageSubscriber(Node):
 
         self.subscription = self.create_subscription(  # Можно добавить QoS если будут потери изображений
             Image,
-            '/camera/image_raw',
+            camera_topic,
             self.img_callback,
             qos_profile=qos_policy)
         
@@ -69,7 +78,6 @@ class ImageSubscriber(Node):
 
         self.dist_params = np.array([ 0.07784166, -0.58879724, -0.00375178, -0.00643462,  1.07082767], dtype=np.float64)
 
-        self.marker_size = 0.07
         cap_width = 640
         cap_height = 480
         
