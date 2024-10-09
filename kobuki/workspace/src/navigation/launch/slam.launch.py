@@ -33,7 +33,7 @@ def generate_launch_description():
         name='slam_toolbox',
         output='screen')
     
-    Node(
+    base_tf = Node(
             package='tf2_ros',
             executable='static_transform_publisher',
             name='base_static_transform_publisher',
@@ -59,6 +59,7 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)
     ld.add_action(start_async_slam_toolbox_node)
+    ld.add_action(base_tf)
     #ld.add_action(rviz)
 
     return ld
