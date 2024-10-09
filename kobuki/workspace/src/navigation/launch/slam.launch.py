@@ -47,7 +47,7 @@ def generate_launch_description():
                 '--frame-id', 'base_link',
                 '--child-frame-id', 'base_footprint',
             ]
-        ),
+        )
     
     rviz = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
