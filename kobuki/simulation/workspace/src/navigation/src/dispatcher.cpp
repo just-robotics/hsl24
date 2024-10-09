@@ -71,7 +71,7 @@ private:
 
     void parsePoints(std::vector<double> points);
     geometry_msgs::msg::PoseStamped dropPoint();
-    void exploreFeedbackCallback(std_msgs::msg::Bool msg);
+    void feedbackCallback(std_msgs::msg::Bool msg);
 };
 
 
@@ -107,7 +107,7 @@ Dispatcher::Dispatcher() : Node("dispatcher") {
     goal_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(goal_pose_topic, 10);
     master_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(master_allow_driving_topic, 10);
     slave_allow_driving_pub_ = this->create_publisher<std_msgs::msg::Bool>(slave_allow_driving_topic, 10);
-    result_sub_ = this->create_subscription<std_msgs::msg::Bool>(result_topic, 10, std::bind(&Dispatcher::exploreFeedbackCallback, this, _1));
+    result_sub_ = this->create_subscription<std_msgs::msg::Bool>(result_topic, 10, std::bind(&Dispatcher::feedbackCallback, this, _1));
     aruco_sub_ = this->create_subscription<std_msgs::msg::Bool>(aruco_topic, 10, std::bind(&Dispatcher::arucoCallback, this, _1));
     result_loop_pub_ = this->create_publisher<std_msgs::msg::Bool>(result_topic, 10);
 
@@ -143,7 +143,7 @@ geometry_msgs::msg::PoseStamped Dispatcher::dropPoint() {
 }
 
 
-void Dispatcher::exploreFeedbackCallback(std_msgs::msg::Bool msg) {
+void Dispatcher::feedbackCallback(std_msgs::msg::Bool msg) {
     if (!aruco_) {
         if (msg.data) {
             goal_pose_pub_->publish(dropPoint());
@@ -153,10 +153,18 @@ void Dispatcher::exploreFeedbackCallback(std_msgs::msg::Bool msg) {
         return;
     }
     
+    
     auto pt = graph_[state_];
     size_t parent_idx = pt.parent_idx();
     if (state_ != parent_idx) {
-        goal_pose_pub_->publish(graph_[parent_idx].pt());
+        RCLCPP_INFO(this->get_logger(), "FEEDBACK");
+        pt = graph_[parent_idx];
+        goal_pose_pub_->publish(pt.pt());
+        state_ = parent_idx;
+        RCLCPP_INFO(this->get_logger(), "publishing point %ld: %lf %lf %lf %ld %ld", state_, pt.x(), pt.y(), pt.t(), pt.idx(), pt.parent_idx());
+    }
+    else {
+        RCLCPP_INFO(this->get_logger(), "STOP");
     }
 }
 

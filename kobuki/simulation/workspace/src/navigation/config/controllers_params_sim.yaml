@@ -12,7 +12,7 @@ master_controller:
         result_topic: /master_controller/result
         odom_topic: /master/odom
         aruco_topic: /aruco/found
-        delta: 0.30
+        delta: 0.20
 
 dispatcher:
     ros__parameters:
