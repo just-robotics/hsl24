@@ -21,7 +21,8 @@ dispatcher:
         master_allow_driving_topic: /master/allow_driving
         slave_allow_driving_topic: /slave/allow_driving
         result_topic: /master_controller/result
-               #         x     y      th   id   parent_id
+        aruco_topic: /aruco/found
+        #         x     y      th   id   parent_id
         points: [+0.0, +0.0, 0.00,  0.,  0.,  # 0
                  +1.2, +0.0, 0.00,  1.,  0.,  # 1
                  +2.1, +0.0, 0.00,  2.,  1.,  # 2
