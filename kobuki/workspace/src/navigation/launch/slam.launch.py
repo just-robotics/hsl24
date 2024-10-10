@@ -33,16 +33,16 @@ def generate_launch_description():
         name='slam_toolbox',
         output='screen')
     
-    rviz = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [os.path.join(get_package_share_directory('navigation'), 'launch', 'rviz.launch.py')]),
-    )
+    # rviz = IncludeLaunchDescription(
+        # PythonLaunchDescriptionSource(
+            # [os.path.join(get_package_share_directory('navigation'), 'launch', 'rviz.launch.py')]),
+    # )
 
     ld = LaunchDescription()
 
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)
     ld.add_action(start_async_slam_toolbox_node)
-    ld.add_action(rviz)
+    #ld.add_action(rviz)
 
     return ld
