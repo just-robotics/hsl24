@@ -191,6 +191,9 @@ void Controller::arucoCallback(std_msgs::msg::Bool msg) {
     use_rotation_ = false;
     start_rotate_ = false;
     rotate_ = false;
+    auto vel = geometry_msgs::msg::Twist();
+    vel.angular.z = 0.0;
+    cmd_vel_pub_->publish(vel);
 }
 
 

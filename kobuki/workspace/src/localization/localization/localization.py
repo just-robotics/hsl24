@@ -133,7 +133,7 @@ class ImageSubscriber(Node):
         self.is_slave_found_publisher = self.create_publisher(Bool, '/aruco/found', 10)
 
         # slave pos world publisher
-        self.slave_pos_publisher = self.create_publisher(PoseStamped, 'aruco_pkg/slave_pose', 10)
+        self.slave_pos_publisher = self.create_publisher(PoseStamped, '/slave/origin', 10)
 
         # slave rotate angle publisher
         self.delta_angle = 0.0
@@ -445,6 +445,10 @@ class ImageSubscriber(Node):
 
     def img_callback(self, msg):
         frame = self.ros2cv.imgmsg_to_cv2(msg, "bgr8")
+        
+        frame[:, 0:240] = 0
+        frame[:, 400:640] = 0
+        
         markerCorners, self.markerIds, _ = self.aruco_detector.detectMarkers(frame)
         pickedMarkerCorners = markerCorners[:1]
         rvec, tvec = self.find_rvecs_tvecs(pickedMarkerCorners)
