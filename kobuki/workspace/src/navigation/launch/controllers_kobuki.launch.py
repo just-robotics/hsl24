@@ -19,7 +19,14 @@ def generate_launch_description():
         parameters=parameters,
         output='screen',
     )
+    dispatcher = Node(
+        package=package_name,
+        executable='dispatcher',
+        parameters=parameters,
+        output='screen',
+    )
 
     return LaunchDescription([
         controller,
+        dispatcher,
     ])
