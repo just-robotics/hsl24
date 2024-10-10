@@ -10,6 +10,8 @@ master_controller:
         allow_driving_topic: /master/allow_driving
         feedback_topic: /navigate_to_pose/_action/feedback
         result_topic: /master_controller/result
+        odom_topic: /master/odom
+        aruco_topic: /aruco/found
         delta: 0.30
 
 dispatcher:
